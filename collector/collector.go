@@ -56,6 +56,7 @@ type Exporter struct {
 	cpuTotal        *prometheus.Desc
 	cpus            *prometheus.Desc
 	cpu_info        *prometheus.Desc
+	cpuPSI          *prometheus.Desc
 	memoryRSS       *prometheus.Desc
 	memoryCache     *prometheus.Desc
 	memoryUsed      *prometheus.Desc
@@ -77,6 +78,7 @@ type CgroupMetric struct {
 	cpuTotal        float64
 	cpus            int
 	cpu_list        string
+	cpuPSI		float64
 	memoryRSS       float64
 	memoryCache     float64
 	memoryUsed      float64
@@ -117,6 +119,8 @@ func NewExporter(paths []string, logger log.Logger, cgroupv2 bool) *Exporter {
 			"Number of CPUs in the cgroup", []string{"cgroup"}, nil),
 		cpu_info: prometheus.NewDesc(prometheus.BuildFQName(Namespace, "", "cpu_info"),
 			"Information about the cgroup CPUs", []string{"cgroup", "cpus"}, nil),
+		cpuPSI: prometheus.NewDesc(prometheus.BuildFQName(Namespace, "cpu", "cpu_psi"),
+			"CPU Pressure for cgroup", []string{"cgroup"}, nil),
 		memoryRSS: prometheus.NewDesc(prometheus.BuildFQName(Namespace, "memory", "rss_bytes"),
 			"Memory RSS used in bytes", []string{"cgroup"}, nil),
 		memoryCache: prometheus.NewDesc(prometheus.BuildFQName(Namespace, "memory", "cache_bytes"),
@@ -150,6 +154,7 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- e.cpuTotal
 	ch <- e.cpus
 	ch <- e.cpu_info
+	ch <- e.cpuPSI
 	ch <- e.memoryRSS
 	ch <- e.memoryCache
 	ch <- e.memoryUsed
@@ -179,6 +184,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(e.cpuUser, prometheus.GaugeValue, m.cpuUser, m.name)
 		ch <- prometheus.MustNewConstMetric(e.cpuSystem, prometheus.GaugeValue, m.cpuSystem, m.name)
 		ch <- prometheus.MustNewConstMetric(e.cpuTotal, prometheus.GaugeValue, m.cpuTotal, m.name)
+		ch <- prometheus.MustNewConstMetric(e.cpuPSI, prometheus.GaugeValue, m.cpuPSI, m.name)
 		ch <- prometheus.MustNewConstMetric(e.cpus, prometheus.GaugeValue, float64(m.cpus), m.name)
 		ch <- prometheus.MustNewConstMetric(e.cpu_info, prometheus.GaugeValue, 1, m.name, m.cpu_list)
 		ch <- prometheus.MustNewConstMetric(e.memoryRSS, prometheus.GaugeValue, m.memoryRSS, m.name)

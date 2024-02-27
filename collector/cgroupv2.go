@@ -161,6 +161,7 @@ func (e *Exporter) getMetricsv2(name string, pids []int, opts cgroup2.InitOpts) 
 		metric.cpuUser = float64(stats.CPU.UserUsec) / 1000000.0
 		metric.cpuSystem = float64(stats.CPU.SystemUsec) / 1000000.0
 		metric.cpuTotal = float64(stats.CPU.UsageUsec) / 1000000.0
+		metric.cpuPSI   = float64(stats.CPU.PSI.Some.Avg10) 
 	}
 	// TODO: Move to https://github.com/containerd/cgroups/blob/d131035c7599c51ff4aed27903c45eb3b2cc29d0/cgroup2/manager.go#L593
 	memoryStatPath := filepath.Join(*CgroupRoot, name, "memory.stat")
